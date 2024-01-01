@@ -1,24 +1,24 @@
 #!/bin/bash
-# author : lordpax
+# author: lordpax
 
 version="0.0.1"
 dependencies=""
 
 # echo_err <msg>
 function echo_err() {
-    [ -z "$1" ] && exit 1
-    echo -e "\e[31mERROR :\e[0m $1" > /dev/stderr
+	[ -z "$1" ] && exit 1
+	echo -e "\e[31mERROR :\e[0m $1" > /dev/stderr
 }
 
 function checkDependencies() {
-    for dependency in $dependencies; do
-        ! command -v "$dependency" > /dev/null 2>&1 && \
-            echo_err "Dependency \"$dependency\" not found" && exit 1
-    done
+	for dependency in $dependencies; do
+		! command -v "$dependency" > /dev/null 2>&1 && \
+			echo_err $"Dependency \"$dependency\" not found" && exit 1
+	done
 }
 
 function helpFunc() {
-    echo "Usage: $(basename "$0") [options]
+	echo "Usage: $(basename "$0") [options]
 
 Option:
 -h or --help .................... Show this help message and exit
@@ -28,17 +28,19 @@ Option:
 checkDependencies
 
 for _ in $(seq 1 $#); do
-    case $1 in
-        -h | --help)
-            helpFunc
-            exit 0;;
-        -v | --version)
-            echo "$version"
-            exit 0;;
-        "");;
-        *)
-            echo_err $"Unknown parameter \"$1\""
-            exit 1
-    esac
-    shift
+	case $1 in
+		-h | --help)
+			helpFunc
+			exit 0;;
+		-v | --version)
+			echo "$version"
+			exit 0;;
+		"");;
+		*)
+			echo_err $"Unknown parameter \"$1\""
+			exit 1
+	esac
+	shift
 done
+
+# vim: set ts=4 sw=4 tw=0 noet :

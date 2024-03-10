@@ -1,13 +1,32 @@
 #!/bin/bash
 # author: lordpax
 
+name=$(basename "$0")
 version="0.0.1"
 dependencies=""
+config="${HOME}/.config/something"
+dotenv="${config}/config"
+logPath="${config}/log"
 
 # echo_err <msg>
 function echo_err() {
 	[ -z "$1" ] && exit 1
 	echo -e "\e[31mERROR :\e[0m $1" > /dev/stderr
+	# echo_log "ERROR : $1"
+}
+
+# echo_info <msg>
+function echo_info() {
+	[ -z "$1" ] && exit 1
+	echo "$1"
+	# echo_log "$1"
+}
+
+# echo_log <msg>
+function echo_log() {
+	[ -z "$1" ] && exit 1
+	local date=$(date "+%Y-%m-%d %H:%M:%S")
+	echo -e "[$date] $1" >> "$logPath"
 }
 
 function checkDependencies() {
@@ -18,29 +37,57 @@ function checkDependencies() {
 }
 
 function helpFunc() {
-	echo "Usage: $(basename "$0") [options]
+	echo "Usage: $name [options]
 
 Option:
--h or --help .................... Show this help message and exit
--v or --version ................. Show version"
+-h or --help           Show this help message and exit
+-v or --version        Show version"
+}
+
+function writeConfig() {
+	echo "some config";
+}
+
+function initConfig() {
+	[ ! -d "$config" ] && mkdir "$config" && echo_info "Config are generated"
+	[ ! -f "$dotenv" ] && writeConfig > "$dotenv" && echo_info "Dotenv file is generated"
+}
+
+function readDotenv() {
+	[ ! -f "$dotenv" ] && echo_err "Dotenv file not found" && exit 1
+
+	local k
+	local v
+
+	while read -r var; do
+		[ "${var:0:1}" = "#" ] && continue
+		k=${var%=*}
+		v=${var#*=}
+		[ -n "$k" ] && export "$k=$v"
+	done < "$dotenv"
+}
+
+function main() {
+	for _ in $(seq 1 $#); do
+		case $1 in
+			-h | --help)
+				helpFunc
+				exit 0;;
+			-v | --version)
+				echo "$version"
+				exit 0;;
+			"");;
+			*)
+				echo_err $"Unknown parameter \"$1\""
+				exit 1
+		esac
+		shift
+	done
 }
 
 checkDependencies
-
-for _ in $(seq 1 $#); do
-	case $1 in
-		-h | --help)
-			helpFunc
-			exit 0;;
-		-v | --version)
-			echo "$version"
-			exit 0;;
-		"");;
-		*)
-			echo_err $"Unknown parameter \"$1\""
-			exit 1
-	esac
-	shift
-done
+# initConfig
+# readDotenv
+main "$@"
 
 # vim: set ts=4 sw=4 tw=0 noet :
